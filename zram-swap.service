@@ -1,0 +1,13 @@
+[Unit]
+Description=zram swap service
+Requires=systemd-modules-load.service local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/zram-swap.sh init
+ExecStop=/usr/local/sbin/zram-swap.sh end
+RemainAfterExit=True
+
+[Install]
+WantedBy=sysinit.target
+#RequiredBy=
