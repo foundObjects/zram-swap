@@ -2,10 +2,15 @@
 # source: https://github.com/foundObjects/zram-swap
 
 [[ "$EUID" == "0" ]] || { echo "This script requires root." && exit 1; }
-set -eo pipefail
+set -euo pipefail
 
-# parse debug flag early so we can trace everything
-[[ "$1" == "-x" ]] && { shift && set -x; } >&/dev/null
+# make sure our environment is predictable
+PATH=/usr/sbin:/usr/bin:/sbin:/bin
+unalias -a
+# parse debug flag early so we can trace user configuration
+(("$#" > 0)) && [[ "$1" == "-x" ]] && { shift && set -x; } >&/dev/null
+# make sure $1 exists for 'set -u' so we can get through 'case "$1"' below
+(("$#" == 0)) && { set -- ""; } >&/dev/null
 
 # set sane defaults, see /etc/default/zram-swap-service for explanations
 _zram_fraction="1/2"
@@ -13,8 +18,8 @@ _zram_algorithm="lz4"
 _comp_factor=''
 
 # load user config
-[[ -f /etc/default/zram-swap-service ]] &&
-  source /etc/default/zram-swap-service
+[[ -f /etc/default/zram-swap ]] &&
+  source /etc/default/zram-swap
 
 # set expected compression ratio based on algorithm; this is a rough estimate
 # skip if already set in user config
@@ -34,9 +39,6 @@ _main() {
   fi
 
   case "$1" in
-    # a little magic to quietly set -u after testing our last expected empty variable
-    # matches every case, runs set -u without logging to the trace and then continues matching
-    *) { set -u; } 2>/dev/null ;;&
     "init" | "start")
       if grep -q zram /proc/swaps; then
         err "zram swap already in use, exiting"
@@ -52,8 +54,8 @@ _main() {
       _end
       ;;
     *)
-      echo "Usage: $0 (init|end)"
-      return 1
+      _usage
+      exit 1
       ;;
   esac
 }
@@ -89,7 +91,7 @@ _init() {
 # end swapping and cleanup
 _end() {
   local ret="0"
-  DEVICES=$(grep zram /proc/swaps | awk '{print $1}')
+  DEVICES=$(awk '/zram/ {print $1}' /proc/swaps)
   for d in $DEVICES; do
     swapoff "$d"
     if ! _rem_zdev "$d"; then
@@ -121,5 +123,6 @@ _rem_zdev() {
 calc() { awk "BEGIN{print $*}"; }
 #crapout() { echo "$@" >&2 && exit 1; }
 err() { echo "Err '${FUNCNAME[1]}': $*" >&2; }
+_usage() { echo "Usage: $(basename "$0") (init|end)"; }
 
 _main "$@"

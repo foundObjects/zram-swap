@@ -8,8 +8,13 @@ if systemctl -q is-active zram-swap.service; then
 fi
 
 install -o root zram-swap.sh /usr/local/sbin/zram-swap.sh
-install -o root zram-swap-service /etc/default/zram-swap-service
-install -o root zram-swap.service /etc/systemd/system/zram-swap.service
+if [[ -f /etc/default/zram-swap-service ]]; then
+  mv -f /etc/default/zram-swap-service /etc/default/zram-swap
+  chmod 0644 /etc/default/zram-swap
+else
+  install -o root -m 0644 service/zram-swap.config /etc/default/zram-swap
+fi
+install -o root -m 0644 service/zram-swap.service /etc/systemd/system/zram-swap.service
 
 systemctl daemon-reload
 systemctl enable zram-swap.service

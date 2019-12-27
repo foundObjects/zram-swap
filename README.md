@@ -22,7 +22,7 @@ Run `zramctl` during use to monitor swap compression and real memory usage.
 
 ### Debugging
 
-Either start zram-swap.sh with `bash -x zram-swap.sh` or `./zram-swap.sh -x (start|stop)` to see what's going wrong.
+Start zram-swap.sh with `bash -x zram-swap.sh (start|stop)` or `./zram-swap.sh -x (start|stop)` to see what's going wrong.
 
 To dump the full execution trace during service start/stop edit  /etc/systemd/systemd/zram-swap.service and add -x to the following two lines:
 
