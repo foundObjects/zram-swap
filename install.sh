@@ -11,9 +11,9 @@ install -o root zram-swap.sh /usr/local/sbin/zram-swap.sh
 if [[ -f /etc/default/zram-swap-service ]]; then
   mv -f /etc/default/zram-swap-service /etc/default/zram-swap
   chmod 0644 /etc/default/zram-swap
-else
-  install -o root -m 0644 service/zram-swap.config /etc/default/zram-swap
 fi
+# TODO detect need to update default/zram-swap and notify user; don't just blind overwrite
+install -o root -m 0644 -b service/zram-swap.config /etc/default/zram-swap
 install -o root -m 0644 service/zram-swap.service /etc/systemd/system/zram-swap.service
 
 systemctl daemon-reload

@@ -16,6 +16,7 @@ unalias -a
 _zram_fraction="1/2"
 _zram_algorithm="lz4"
 _comp_factor=''
+_zram_fixedsize=''
 
 # load user config
 [[ -f /etc/default/zram-swap ]] &&
@@ -62,9 +63,18 @@ _main() {
 
 # initialize swap
 _init() {
-  # Calculate memory to use for zram
-  totalmem=$(LC_ALL=C free | grep -e "^Mem:" | sed -e 's/^Mem: *//' -e 's/  *.*//')
-  mem=$(calc "$totalmem * $_comp_factor * $_zram_fraction * 1024")
+  if [[ -n "$_zram_fixedsize" ]]; then
+    if ! [[ $_zram_fixedsize =~ ^[[:digit:]]+(\.[[:digit:]]+)?(G|M)$ ]]; then
+      err "Invalid size '$_zram_fixedsize'. Format sizes like: 100M 250M 1.5G 2G etc."
+      exit 1
+    fi
+    # Use user supplied zram size
+    mem="$_zram_fixedsize"
+  else
+    # Calculate memory to use for zram
+    totalmem=$(LC_ALL=C free | grep -e "^Mem:" | sed -e 's/^Mem: *//' -e 's/  *.*//')
+    mem=$(calc "$totalmem * $_comp_factor * $_zram_fraction * 1024")
+  fi
 
   # NOTE: init is a little janky; zramctl sometimes fails if we don't wait after module
   #       load so retry a couple of times with slightly increasing delay before giving up

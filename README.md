@@ -1,5 +1,5 @@
 # zram-swap
-Simple zram swap setup + teardown script with systemd unit &amp; /etc/default configuration
+Simple zram swap setup + teardown script for modern systemd Linux systems
 
 https://github.com/foundObjects/zram-swap
 
@@ -12,11 +12,11 @@ cd zram-swap && sudo bash install.sh
 
 ### Usage
 
-zram-swap.service will be started automatically during boot.
+zram-swap.service will be started automatically after installation and during each subsequent boot.
 
 The default allocation creates a zram device that should use around half of physical memory when completely full.
 
-Edit `/etc/default/zram-swap-service` if you'd like to change compression algorithms or swap allocation and then restart zram-swap with `systemctl restart zram-swap.service`.
+Edit `/etc/default/zram-swap` if you'd like to change compression algorithms or swap allocation and then restart zram-swap with `systemctl restart zram-swap.service`.
 
 Run `zramctl` during use to monitor swap compression and real memory usage.
 
