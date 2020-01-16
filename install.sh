@@ -10,7 +10,7 @@ export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 # installer main body:
 _main() {
   # ensure $1 exists so 'set -u' doesn't error out
-  [ "$#" -eq "0" ] && { set -- ""; } > /dev/null 2>&1
+  { [ "$#" -eq "0" ] && set -- ""; } > /dev/null 2>&1
 
   case "$1" in
     "--uninstall")
@@ -32,64 +32,77 @@ _main() {
 }
 
 _install() {
-  set -x
-  oldconfig=''
   configdiff=''
+  newconfig=''
   if systemctl -q is-active zram-swap.service; then
     echo "Stopping zram-swap service"
     systemctl stop zram-swap.service
   fi
 
-  echo "Installing script and service"
+  echo "Installing script and service ..."
   install -o root zram-swap.sh /usr/local/sbin/zram-swap.sh
   install -o root -m 0644 service/zram-swap.service /etc/systemd/system/zram-swap.service
 
   # rename & cleanup old version config file
   if [ -f /etc/default/zram-swap-service ]; then
-    echo "Old config found, moving to new path"
     mv -f /etc/default/zram-swap-service /etc/default/zram-swap
     chown root:root /etc/default/zram-swap
     chmod 0644 /etc/default/zram-swap
   fi
 
-  # TODO this really needs work... {{{
   if [ -f /etc/default/zram-swap ]; then
-    #{ set +e; } >/dev/null 2>&1
-    #diff /etc/default/zram-swap service/zram-swap.config > /dev/null 2>&1
-    #[ "$?" -gt 0 ] && oldconfig='y'
-    #{ set -e; } >/dev/null 2>&1
     {
       set +e
-      # TODO only run diff once
-      #configdiff=$(diff /etc/default/zram-swap service/zram-swap.config)
-      diff /etc/default/zram-swap service/zram-swap.config
-      [ "$?" -gt 0 ] && oldconfig='y'
+      configdiff=$(diff -y /etc/default/zram-swap service/zram-swap.config)
       set -e
     } > /dev/null 2>&1
+    if [ -n "$configdiff" ]; then
+      yn=''
+      echo "Installed configuration differs from packaged version."
+      echo
+      echo "Install packaged config? Original will be backed up as /etc/default/zram-swap.oldconfig"
+      while true; do
+        echo "(y)Install packaged config / (n)Keep current / (s)Show diff"
+        printf "[y/n/s]: "
+        read yn
+        case "$yn" in
+          [Yy]*)
+            echo "Installing packaged config ..."
+            install -o root -m 0644 --backup --suffix=".oldconfig" service/zram-swap.config /etc/default/zram-swap
+            newconfig='y'
+            break
+            ;;
+          [Nn]*) break ;;
+          [Ss]*) printf "$configdiff\n\n" ;;
+        esac
+      done
+    fi
+  else
+    install -o root -m 0644 -b service/zram-swap.config /etc/default/zram-swap
   fi
-  install -o root -m 0644 -b service/zram-swap.config /etc/default/zram-swap
 
-  echo "Reloading systemd unit files and enabling boot-time service"
+  echo "Reloading systemd unit files and enabling boot-time service ..."
   systemctl daemon-reload
   systemctl enable zram-swap.service
-  if [ -n "$oldconfig" ]; then
+
+  if [ -n "$newconfig" ]; then
     cat <<- HEREDOC
-		Configuration file updated; old config saved as /etc/default/zram-swap~
+		Configuration file updated; old config saved as /etc/default/zram-swap.oldconfig
 
-		diff follows:
-		$(diff /etc/default/zram-swap~ /etc/default/zram-swap || true)
-
-		Make any desired changes to the new config and then start the service with
+		Please review changes between configurations and then start the service with
 		systemctl start zram-swap.service
 		HEREDOC
   else
+    echo "Starting zram-swap service ..."
     systemctl start zram-swap.service
   fi
-  #}}}
+
+  echo
+  echo "zram-swap service installed successfully!"
+  echo
 }
 
 _uninstall() {
-  set -x
   if systemctl -q is-active zram-swap.service; then
     echo "Stopping zram-swap service"
     systemctl stop zram-swap.service
