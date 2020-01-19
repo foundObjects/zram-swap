@@ -131,7 +131,8 @@ _rem_zdev() {
   return 0
 }
 
-calc() { awk "BEGIN{print $*}"; }
+#calc() { awk "BEGIN{print $*}"; } # awk occasionally outputs scientific notation
+calc() { echo "r=$*;scale=0;r/1" | LC_ALL=C bc; } # bc doesn't :)
 #crapout() { echo "$@" >&2 && exit 1; }
 err() { echo "Err $*" >&2; }
 _usage() { echo "Usage: $(basename "$0") (init|end)"; }
