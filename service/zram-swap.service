@@ -1,6 +1,8 @@
 [Unit]
 Description=zram swap service
-Requires=systemd-modules-load.service local-fs.target
+Requires=systemd-modules-load.service
+Before=shutdown.target
+#After=
 
 [Service]
 Type=oneshot

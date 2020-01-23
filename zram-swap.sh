@@ -81,7 +81,7 @@ _init() {
   #       load so retry a couple of times with slightly increasing delay before giving up
   _device=''
   for i in $(seq 3); do
-    sleep "$(calc "0.1 * $i")"
+    sleep "$(calc 2 "0.1 * $i")"
     _device=$(zramctl -f -s "$mem" -a "$_zram_algorithm") || true
     [ -b "$_device" ] && break
   done
@@ -101,7 +101,7 @@ _init() {
 
 # end swapping and cleanup
 _end() {
-  local ret="0"
+  ret="0"
   DEVICES=$(awk '/zram/ {print $1}' /proc/swaps)
   for d in $DEVICES; do
     swapoff "$d"
@@ -120,7 +120,7 @@ _rem_zdev() {
     return 1
   fi
   for i in $(seq 3); do
-    sleep "$(calc "0.1 * $i")"
+    sleep "$(calc 2 "0.1 * $i")"  # calculate "0.1 * $i" rounded to 2 digits
     zramctl -r "$1" || true
     [ -b "$1" ] || break
   done
@@ -131,8 +131,14 @@ _rem_zdev() {
   return 0
 }
 
-#calc() { awk "BEGIN{print $*}"; } # awk occasionally outputs scientific notation
-calc() { echo "r=$*;scale=0;r/1" | LC_ALL=C bc; } # bc doesn't :)
+# calculate with variable precision
+# usage: calc (int; precision := 0) (str; expr to evaluate)
+calc() {
+  case "$1" in [0-9]) n="$1" && shift ;; *) n=0 ;; esac
+  awk "BEGIN{printf \"%.${n}f\", $*}"
+}
+#calc_i() { echo "r=$*;scale=0;r/1" | LC_ALL=C bc; }  # bc int calc
+#calc_f() { echo "$*" | LC_ALL=C bc; }                # todo: float calc
 #crapout() { echo "$@" >&2 && exit 1; }
 err() { echo "Err $*" >&2; }
 _usage() { echo "Usage: $(basename "$0") (init|end)"; }
