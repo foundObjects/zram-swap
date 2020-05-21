@@ -6,10 +6,11 @@ Before=shutdown.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/sbin/zram-swap.sh init
-ExecStop=/usr/local/sbin/zram-swap.sh end
-RemainAfterExit=True
+ExecStart=/usr/local/sbin/zram-swap.sh start
+ExecStop=/usr/local/sbin/zram-swap.sh stop
+RemainAfterExit=true
 
 [Install]
 WantedBy=sysinit.target
 #RequiredBy=
+

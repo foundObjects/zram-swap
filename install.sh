@@ -1,4 +1,6 @@
 #!/bin/sh
+# source: https://github.com/foundObjects/zram-swap
+# shellcheck disable=SC2039,SC2162
 
 #[ "$(id -u)" -eq '0' ] || { echo "This script requires root." && exit 1; }
 case "$(readlink /proc/$$/exe)" in */bash) set -euo pipefail ;; *) set -eu ;; esac
@@ -73,7 +75,7 @@ _install() {
             break
             ;;
           [Nn]*) break ;;
-          [Ss]*) printf "$configdiff\n\n" ;;
+          [Ss]*) printf "%s\n\n" "$configdiff" ;;
         esac
       done
     fi

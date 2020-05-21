@@ -1,17 +1,16 @@
 #!/bin/sh
 # source: https://github.com/foundObjects/zram-swap
+# shellcheck disable=SC2013,SC2039,SC2064
 
 [ "$(id -u)" -eq '0' ] || { echo "This script requires root." && exit 1; }
 case "$(readlink /proc/$$/exe)" in */bash) set -euo pipefail ;; *) set -eu ;; esac
 
-# make sure our environment is predictable
+# ensure a predictable environment
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 \unalias -a
 
 # parse debug flag early so we can trace user configuration
 [ "$#" -gt "0" ] && [ "$1" = "-x" ] && shift && set -x
-# make sure $1 exists for 'set -u' so we can get through 'case "$1"' below
-{ [ "$#" -eq "0" ] && set -- ""; } > /dev/null 2>&1
 
 # set sane defaults, see /etc/default/zram-swap for explanations
 _zram_fraction="1/2"
@@ -23,8 +22,9 @@ _zram_fixedsize=''
 [ -f /etc/default/zram-swap ] &&
   . /etc/default/zram-swap
 
-# set expected compression ratio based on algorithm; this is a rough estimate
-# skip if already set in user config
+# set expected compression ratio based on algorithm -- we'll use this to
+# calculate how much uncompressed swap data we expect to fit into our
+# target ram allocation.  skip if already set in user config
 if [ -z "$_comp_factor" ]; then
   case $_zram_algorithm in
     lzo* | zstd) _comp_factor="3" ;;
@@ -39,6 +39,9 @@ _main() {
     err "main: Failed to load zram module, exiting"
     return 1
   fi
+
+  # make sure `set -u` doesn't cause 'case "$1"' to throw errors below
+  { [ "$#" -eq "0" ] && set -- ""; } > /dev/null 2>&1
 
   case "$1" in
     "init" | "start")
@@ -77,10 +80,11 @@ _init() {
     mem=$(calc "$totalmem * $_comp_factor * $_zram_fraction * 1024")
   fi
 
-  # NOTE: init is a little janky; zramctl sometimes fails if we don't wait after module
-  #       load so retry a couple of times with slightly increasing delay before giving up
+  # NOTE: zramctl sometimes fails if we don't wait for the module to settle after loading
+  #       we'll retry a couple of times with slightly increasing delays before giving up
   _device=''
   for i in $(seq 3); do
+    # sleep for "0.1 * $i" seconds rounded to 2 digits
     sleep "$(calc 2 "0.1 * $i")"
     _device=$(zramctl -f -s "$mem" -a "$_zram_algorithm") || true
     [ -b "$_device" ] && break
@@ -102,11 +106,10 @@ _init() {
 # end swapping and cleanup
 _end() {
   ret="0"
-  DEVICES=$(awk '/zram/ {print $1}' /proc/swaps)
-  for d in $DEVICES; do
-    swapoff "$d"
-    if ! _rem_zdev "$d"; then
-      err "end: Failed to remove zram device $d"
+  for dev in $(awk '/zram/ {print $1}' /proc/swaps); do
+    swapoff "$dev"
+    if ! _rem_zdev "$dev"; then
+      err "end: Failed to remove zram device $dev"
       ret=1
     fi
   done
@@ -120,7 +123,8 @@ _rem_zdev() {
     return 1
   fi
   for i in $(seq 3); do
-    sleep "$(calc 2 "0.1 * $i")"  # calculate "0.1 * $i" rounded to 2 digits
+    # sleep for "0.1 * $i" seconds rounded to 2 digits
+    sleep "$(calc 2 "0.1 * $i")"
     zramctl -r "$1" || true
     [ -b "$1" ] || break
   done
@@ -131,18 +135,17 @@ _rem_zdev() {
   return 0
 }
 
+# posix substitute for bash pattern matching [[ $foo =~ bar-pattern ]]
+_regex_match() { echo "$1" | grep -Eq "$2" > /dev/null 2>&1; }
+
 # calculate with variable precision
 # usage: calc (int; precision := 0) (str; expr to evaluate)
 calc() {
-  case "$1" in [0-9]) n="$1" && shift ;; *) n=0 ;; esac
+  _regex_match "$1" '^[[:digit:]]+$' && { n="$1" && shift; } || n=0
   awk "BEGIN{printf \"%.${n}f\", $*}"
 }
-#calc_i() { echo "r=$*;scale=0;r/1" | LC_ALL=C bc; }  # bc int calc
-#calc_f() { echo "$*" | LC_ALL=C bc; }                # todo: float calc
-#crapout() { echo "$@" >&2 && exit 1; }
+
 err() { echo "Err $*" >&2; }
 _usage() { echo "Usage: $(basename "$0") (init|end)"; }
-# posix compliant replacement for [[ $foo =~ bar-pattern ]]
-_regex_match() { echo "$1" | grep -Eq "$2" > /dev/null 2>&1; }
 
 _main "$@"
