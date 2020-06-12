@@ -136,7 +136,8 @@ _rem_zdev() {
 }
 
 # posix substitute for bash pattern matching [[ $foo =~ bar-pattern ]]
-_regex_match() { echo "$1" | grep -Eq "$2" > /dev/null 2>&1; }
+# usage: _regex_match "$foo" "bar-pattern"
+_regex_match() { echo "$1" | grep -Eq -- "$2" > /dev/null 2>&1; }
 
 # calculate with variable precision
 # usage: calc (int; precision := 0) (str; expr to evaluate)
