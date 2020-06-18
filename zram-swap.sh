@@ -76,7 +76,7 @@ _init() {
     mem="$_zram_fixedsize"
   else
     # Calculate memory to use for zram
-    totalmem=$(LC_ALL=C free | grep -e "^Mem:" | sed -e 's/^Mem: *//' -e 's/  *.*//')
+    totalmem=$(awk '/MemTotal/{print $2}' /proc/meminfo)
     mem=$(calc "$totalmem * $_comp_factor * $_zram_fraction * 1024")
   fi
 
