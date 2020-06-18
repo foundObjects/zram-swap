@@ -14,3 +14,4 @@ RemainAfterExit=true
 WantedBy=sysinit.target
 #RequiredBy=
 
+# vim:ft=systemd
