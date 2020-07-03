@@ -5,29 +5,34 @@ https://github.com/foundObjects/zram-swap
 
 ### Why?
 
-There are dozens of zram swap scripts; Unfortunately most are a bit crufty:
-they generally don't handle errors well, or they implement obsolete performance
-hacks from Linux 3.14 and almost all of them include logic errors in their
-device size calculations.
+There are dozens of zram swap scripts; Unfortunately many lack error handling,
+make device size logic errors or include complicated legacy performance hacks.
 
-I wrote zram-swap because I couldn't find a replacement for the Ubuntu
-`zram-config` package that was simple, handled failures well, didn't make
-mistakes with device sizes and kept its user-facing configuration
-straightforward and easy to use.
+I wrote zram-swap because I couldn't find a modern replacement for the Ubuntu
+`zram-config` package that was simple, handled failures without leaving swaps
+half configured, didn't make common device sizing mistakes and kept user-facing
+configuration straightforward and easy to understand.
 
-### Installation
+Additionally underneath the systemd service wrapper the whole thing is written
+in posix shell and only needs a shell, `modprobe`, `zramctl` and very basic
+`awk` and `grep` calls to function.
+
+### Installation and Usage
 
 ```bash
 git clone https://github.com/foundObjects/zram-swap.git
 cd zram-swap && sudo ./install.sh
 ```
 
-### Usage
-
 The installer will start the zram-swap.service automatically after installation
 and enable service start during each subsequent boot. The default allocation
 creates an lz4 zram device that should use around half of physical memory when
 completely full.
+
+I chose lz4 as the default to give low spec machines (systems that often see
+the greatest benefit from swap on zram) whatever performance edge I could.
+While lzo-rle is quite fast on modern hardware a machine like a Raspberry Pi
+2B appreciates every optimization advantage I can give it.
 
 The default configuration using lz4 should work well for most people. lzo may
 provide slightly better RAM utilization at a cost of slightly more expensive
@@ -35,18 +40,12 @@ decompression. zstd should provide better compression than lz\* and still be
 moderately fast on most machines. On very modern kernels and reasonably fast
 hardware the best overall choice is probably lzo-rle.
 
-I chose lz4 as the default to give low spec machines (some of the greatest
-beneficiaries of swap on zram) whatever performance edge I could. While
-lzo-rle is quite fast on modern hardware a machine like a Raspberry Pi 2B
-needs every optimization advantage I can give it.
+### Configuration
 
 Edit `/etc/default/zram-swap` if you'd like to change compression algorithms or
-swap allocation and then restart zram-swap with `systemctl restart
-zram-swap.service`.
+swap allocation and then restart zram-swap with `systemctl restart zram-swap.service`.
 
-Run `zramctl` during use to monitor swap compression and real memory usage.
-
-A very simple configuration that's expected to use up to 2GB RAM might look
+A very simple configuration that's expected to use roughly 2GB RAM might look
 something like:
 
 ```bash
@@ -77,10 +76,10 @@ ExecStop=/usr/local/sbin/zram-swap.sh -x stop
 
 Tested on Linux 4.4 through Linux 5.7.
 
-This should run on pretty much any recent (4.0+? kernel) Linux system using
-systemd. If anyone wants to try it on something really old and let me know how
-compatible the script is with older systems I'm definitely interested, but I
-don't have the legacy systems or time to test exhaustively.
+This should run on pretty much any recent (4.0+? kernel) Linux system. If
+anyone wants to test backward compatibility and let me know how compatible the
+script is on older systems I'm interested but I don't have the legacy systems
+or time to test exhaustively.
 
-The script itself should also be fully compatible with SysVinit compatible init
-systems. PRs making improvement there are welcome!
+The core script should also be fully compatible with alternate init systems and
+minimal systems using busybox.
