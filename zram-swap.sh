@@ -149,7 +149,7 @@ _regex_match() { echo "$1" | grep -Eq -- "$2" > /dev/null 2>&1; }
 # usage: calc (int; precision := 0) (str; expr to evaluate)
 calc() {
   _regex_match "$1" '^[[:digit:]]+$' && { n="$1" && shift; } || n=0
-  awk "BEGIN{printf \"%.${n}f\", $*}"
+  LC_NUMERIC=C awk "BEGIN{printf \"%.${n}f\", $*}"
 }
 
 err() { echo "Err $*" >&2; }
