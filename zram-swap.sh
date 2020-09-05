@@ -58,6 +58,12 @@ _main() {
       fi
       _end
       ;;
+    "restart")
+      # TODO: stub for restart support
+      echo "not supported yet"
+      _usage
+      exit 1
+      ;;
     *)
       _usage
       exit 1
@@ -147,6 +153,6 @@ calc() {
 }
 
 err() { echo "Err $*" >&2; }
-_usage() { echo "Usage: $(basename "$0") (init|end)"; }
+_usage() { echo "Usage: $(basename "$0") (start|stop)"; }
 
 _main "$@"
