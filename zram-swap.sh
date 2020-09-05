@@ -100,7 +100,7 @@ _init() {
     # cleanup the device if swap setup fails
     trap "_rem_zdev $_device" EXIT
     mkswap "$_device"
-    swapon -p 5 "$_device"
+    swapon -d -p 5 "$_device"
     trap - EXIT
     return 0
   else
