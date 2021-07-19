@@ -11,6 +11,19 @@ mistakes and kept user-facing configuration straightforward and easy to understa
 
 ### Installation and Usage
 
+Arch Linux:
+
+```bash
+mkdir zram-swap-git && cd zram-swap-git
+wget https://raw.githubusercontent.com/foundObjects/zram-swap/master/PKGBUILD
+makepkg -Cci
+```
+
+You'll need to start and enable `zram-swap.service` after installation on Arch.
+Edit `/etc/default/zram-swap` first if desired, see below for details.
+
+Others:
+
 ```bash
 git clone https://github.com/foundObjects/zram-swap.git
 cd zram-swap && sudo ./install.sh
@@ -70,7 +83,7 @@ ExecStop=/usr/local/sbin/zram-swap.sh -x stop
 
 ### Compatibility
 
-Tested on Linux 4.4 through Linux 5.10.
+Tested on Linux 4.4 through Linux 5.14.
 
 Requirements are minimal; Underneath the systemd service wrapper the swap setup
 script needs only a posix shell, `modprobe`, `zramctl` and very basic `awk` and
