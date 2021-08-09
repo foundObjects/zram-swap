@@ -1,0 +1,15 @@
+pkgbase = zram-swap-git
+	pkgdesc = A simple zram swap service for modern systemd Linux
+	pkgver = 02.r1.g867269f
+	pkgrel = 1
+	url = https://github.com/foundObjects/zram-swap.git
+	arch = any
+	license = MIT
+	depends = systemd
+	depends = bash
+	backup = etc/default/zram-swap
+	source = git+https://github.com/foundObjects/zram-swap.git
+	sha512sums = SKIP
+
+pkgname = zram-swap-git
+	provides = zram-swap
