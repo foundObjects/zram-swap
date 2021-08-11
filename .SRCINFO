@@ -8,7 +8,7 @@ pkgbase = zram-swap-git
 	depends = systemd
 	depends = bash
 	backup = etc/default/zram-swap
-	source = https://github.com/foundObjects/zram-swap.git
+	source = git+https://github.com/foundObjects/zram-swap.git
 	sha512sums = SKIP
 
 pkgname = zram-swap-git

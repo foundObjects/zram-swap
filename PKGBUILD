@@ -1,7 +1,7 @@
 # Maintainer: Arglebargle < arglebargle DASH aur AT arglebargle DOT dev >
 pkgname=zram-swap-git
 _pkgname=zram-swap
-pkgver=02.r1.g867269f
+pkgver=02.r2.g5758ac0
 pkgrel=1
 pkgdesc="A simple zram swap service for modern systemd Linux"
 arch=('any')
@@ -9,7 +9,7 @@ url="https://github.com/foundObjects/zram-swap.git"
 license=('MIT')
 depends=('systemd' 'bash')
 backup=('etc/default/zram-swap')
-source=('https://github.com/foundObjects/zram-swap.git')
+source=('git+https://github.com/foundObjects/zram-swap.git')
 sha512sums=('SKIP')
 
 pkgver() {
