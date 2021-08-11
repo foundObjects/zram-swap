@@ -9,7 +9,7 @@ url="https://github.com/foundObjects/zram-swap.git"
 license=('MIT')
 depends=('systemd' 'bash')
 backup=('etc/default/zram-swap')
-source=('git+https://github.com/foundObjects/zram-swap.git')
+source=('https://github.com/foundObjects/zram-swap.git')
 sha512sums=('SKIP')
 
 pkgver() {
