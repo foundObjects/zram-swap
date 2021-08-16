@@ -11,18 +11,22 @@ mistakes and kept user-facing configuration straightforward and easy to understa
 
 ### Installation and Usage
 
-Arch Linux:
+*Arch Linux:*
+
+Install from the AUR: `paru -S zram-swap-git`
+
+or directly from GitHub:
 
 ```bash
 mkdir zram-swap-git && cd zram-swap-git
-wget https://raw.githubusercontent.com/foundObjects/zram-swap/master/PKGBUILD
+wget https://raw.githubusercontent.com/foundObjects/zram-swap/arch-packaging/PKGBUILD
 makepkg -Cci
 ```
 
 You'll need to start and enable `zram-swap.service` after installation on Arch.
-Edit `/etc/default/zram-swap` first if desired, see below for details.
+Make any configuration changes to `/etc/default/zram-swap` first if desired, see below for details.
 
-Others:
+*Others:*
 
 ```bash
 git clone https://github.com/foundObjects/zram-swap.git
