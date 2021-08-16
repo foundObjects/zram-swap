@@ -2,12 +2,12 @@
 pkgname=zram-swap-git
 _pkgname=zram-swap
 pkgver=02.r2.g5758ac0
-pkgrel=1
+pkgrel=2
 pkgdesc="A simple zram swap service for modern systemd Linux"
 arch=('any')
 url="https://github.com/foundObjects/zram-swap.git"
 license=('MIT')
-depends=('systemd' 'bash')
+depends=('systemd' 'sh' 'grep' 'awk' 'util-linux' 'kmod')
 backup=('etc/default/zram-swap')
 source=('git+https://github.com/foundObjects/zram-swap.git')
 sha512sums=('SKIP')
