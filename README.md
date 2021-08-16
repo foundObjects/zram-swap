@@ -17,7 +17,7 @@ Install from the AUR: `paru -S zram-swap-git`
 
 or directly from GitHub:
 
-```bash
+```sh
 mkdir zram-swap-git && cd zram-swap-git
 wget https://raw.githubusercontent.com/foundObjects/zram-swap/arch-packaging/PKGBUILD
 makepkg -Cci
@@ -28,7 +28,7 @@ Make any configuration changes to `/etc/default/zram-swap` first if desired, see
 
 *Others:*
 
-```bash
+```sh
 git clone https://github.com/foundObjects/zram-swap.git
 cd zram-swap && sudo ./install.sh
 ```
@@ -51,7 +51,7 @@ The configuration file is heavily commented and self-documenting.
 A very simple configuration that's expected to use roughly 2GB RAM might look
 something like:
 
-```bash
+```sh
 # override fractional calculations and specify a fixed swap size
 _zram_fixedsize="6G"
 
@@ -74,15 +74,13 @@ lz4.
 
 ### Debugging
 
-Start zram-swap.sh with `zram-swap.sh -x (start|stop)` to view the debug trace
-and determine what's going wrong.
+To view a script debug trace either start zram-swap.sh with `zram-swap.sh -x (start|stop)`
+or uncomment the debug flag in `/etc/default/zram-swap`:
 
-To dump the full execution trace during service start/stop edit
-`/etc/systemd/systemd/zram-swap.service` and add -x to the following two lines:
-
-```
-ExecStart=/usr/local/sbin/zram-swap.sh -x start
-ExecStop=/usr/local/sbin/zram-swap.sh -x stop
+```sh
+# setting _zram_swap_debugging to any non-zero value enables debugging
+# default: undefined
+_zram_swap_debugging="beep boop"
 ```
 
 ### Compatibility

@@ -17,10 +17,15 @@ _zram_fraction="1/2"
 _zram_algorithm="lz4"
 _comp_factor=''
 _zram_fixedsize=''
+_zram_swap_debug=''
 
 # load user config
 [ -f /etc/default/zram-swap ] &&
   . /etc/default/zram-swap
+
+# support a debugging flag in the config file so people don't have to edit the systemd service
+# to enable debugging
+[ -n "$_zram_swap_debug" ] && set -x
 
 # set expected compression ratio based on algorithm -- we'll use this to
 # calculate how much uncompressed swap data we expect to fit into our
