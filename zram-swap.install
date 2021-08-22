@@ -1,0 +1,20 @@
+post_install() {
+  cat << YEET
+
+  Make any desired configuration changes to /etc/default/zram-swap then execute
+
+    $ systemctl daemon-reload
+    $ systemctl enable zram-swap.service
+
+  To enable zram swap immediately run
+
+    $ systemctl start zram-swap.service
+
+  Report any issues to:
+  https://github.com/foundObjects/zram-swap/issues
+
+  This package is forked from:
+  https://github.com/foundObjects/zram-swap
+
+YEET
+}
