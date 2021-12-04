@@ -2,3 +2,5 @@ zram-swap/
 src/
 pkg/
 *.pkg.tar.*
+*.log.*
+*.log
