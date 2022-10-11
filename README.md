@@ -62,6 +62,8 @@ _zram_algorithm="lzo-rle"
 Remember that the ZRAM device size references uncompressed data, real memory
 utilization should be ~2-3x smaller than the zram device size due to compression.
 
+If you run `install.sh` in a automatic script, like ansible, use `SET_CONFIG_UPDATE=[(I)nstall, (K)eep] ./install.sh` to skip the interactive-prompt.
+
 #### A quick note RE: compression algorithms:
 
 The default configuration using lz4 should work well for most people. lzo may
