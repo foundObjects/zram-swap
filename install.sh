@@ -65,8 +65,15 @@ _install() {
       echo "Install package default configuration? Local config will be saved as /etc/default/zram-swap.oldconfig"
       while true; do
         echo "(I)nstall package default / (K)eep local configuration / View (D)iff"
-        printf "[i/k/d]: "
-        read yn
+        set +u
+        if [ -n "$SET_CONFIG_UPDATE" ]; then
+          yn=$SET_CONFIG_UPDATE
+          unset SET_CONFIG_UPDATE
+        else
+          printf "[i/k/d]: "
+          read yn
+        fi
+        set -u
         case "$yn" in
           [Ii]*)
             echo "Installing package default ..."
@@ -76,6 +83,7 @@ _install() {
             ;;
           [Kk]*) break ;;
           [Dd]*) printf "%s\n\n" "$configdiff" ;;
+	  *) ;;
         esac
       done
     fi
